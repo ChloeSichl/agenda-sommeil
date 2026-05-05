@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mon Sommeil">
+<meta name="theme-color" content="#1a1a2e">
+<title>Mon Agenda du Sommeil</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@700;800&display=swap');
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+  --navy: #1a1a3e;
+  --indigo: #4338ca;
+  --lindigo: #eef2ff;
+  --teal: #0f766e;
+  --lteal: #f0fdfa;
+  --amber: #b45309;
+  --lamber: #fffbeb;
+  --gray: #64748b;
+  --lgray: #f8fafc;
+  --dgray: #1e293b;
+  --white: #ffffff;
+  --bg: #f4f5fb;
+  --font-d: 'Baloo 2', cursive;
+  --font-b: 'Nunito', sans-serif;
+  --radius: 16px;
+  --shadow: 0 3px 14px rgba(0,0,0,0.09);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{font-family:var(--font-b);background:var(--bg);min-height:100vh;
+  padding-top:calc(var(--safe-top) + 6px);
+  padding-bottom:calc(var(--safe-bot) + 88px)}
+
+/* HEADER */
+.app-header{text-align:center;padding:12px 18px 8px}
+.app-header h1{font-family:var(--font-d);font-size:1.3rem;font-weight:800;color:var(--navy)}
+.app-header p{font-size:.78rem;color:var(--gray);margin-top:2px}
+.name-badge{display:inline-block;margin-top:6px;padding:4px 13px;background:#e0e7ff;
+  border-radius:20px;font-size:.78rem;font-weight:700;color:#3730a3;cursor:pointer}
+
+/* NAV */
+.nav{display:flex;gap:5px;padding:0 13px 10px;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav button{flex:1;min-width:58px;padding:7px 3px;border-radius:12px;border:none;
+  font-family:var(--font-b);font-size:.68rem;font-weight:700;cursor:pointer;
+  background:white;color:#94a3b8;box-shadow:0 2px 7px rgba(0,0,0,0.06);
+  transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:2px}
+.nav button .ni{font-size:1.05rem}
+.nav button.active{background:var(--navy);color:white;box-shadow:0 4px 14px rgba(26,26,62,0.24)}
+
+/* SCREENS */
+.screen{display:none;padding:0 13px;animation:fadeIn .2s ease}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* CARDS */
+.card{background:white;border-radius:var(--radius);padding:14px;
+  box-shadow:var(--shadow);margin-bottom:10px}
+
+/* SECTION PILL */
+.pill{display:flex;align-items:center;gap:8px;padding:7px 12px;
+  border-radius:20px;margin-bottom:10px}
+.pill-icon{font-size:1rem}
+.pill-label{font-family:var(--font-d);font-size:.88rem;font-weight:700}
+
+/* TIME BLOCKS */
+.time-blocks{display:flex;gap:6px;margin-bottom:10px}
+.time-block{flex:1;background:var(--lgray);border-radius:12px;padding:10px 8px;text-align:center}
+.tb-icon{font-size:1.3rem;margin-bottom:4px}
+.tb-label{font-size:.68rem;font-weight:700;color:var(--gray);margin-bottom:6px}
+.tb-input{width:100%;padding:6px 4px;border:1.5px solid #e2e8f0;border-radius:9px;
+  font-family:var(--font-b);font-size:.9rem;text-align:center;
+  background:white;color:var(--dgray);outline:none}
+.tb-input:focus{border-color:var(--indigo)}
+.tb-hint{font-size:.62rem;color:#94a3b8;margin-top:3px}
+
+/* CHECKLIST */
+.check-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.check-chip{display:flex;align-items:center;gap:5px;padding:6px 10px;
+  border-radius:20px;border:1.5px solid #e2e8f0;background:var(--lgray);
+  font-size:.73rem;font-weight:700;color:var(--gray);cursor:pointer;transition:all .15s}
+.check-chip .ci{font-size:.95rem}
+.check-chip.active-indigo{background:#eef2ff;border-color:#818cf8;color:#3730a3}
+.check-chip.active-amber{background:#fffbeb;border-color:#fbbf24;color:#92400e}
+.check-chip.active-teal{background:#f0fdfa;border-color:#5eead4;color:#0f766e}
+.add-row{display:flex;gap:6px;margin-top:6px}
+.add-row input{flex:1;padding:7px 10px;border:1.5px solid #e2e8f0;border-radius:10px;
+  font-family:var(--font-b);font-size:.78rem;background:var(--lgray);color:var(--dgray);outline:none}
+.add-row input:focus{border-color:var(--indigo);background:white}
+.add-row button{padding:7px 11px;border-radius:10px;border:1.5px solid #e2e8f0;
+  background:white;font-family:var(--font-b);font-size:.78rem;font-weight:700;
+  color:var(--gray);cursor:pointer}
+
+/* QUALITY CARDS */
+.qual-row{display:flex;gap:5px;margin-bottom:6px}
+.qual-card{flex:1;border-radius:12px;padding:8px 3px;text-align:center;
+  cursor:pointer;border:2px solid transparent;transition:all .18s}
+.qual-card .qe{font-size:1.3rem;margin-bottom:3px}
+.qual-card .ql{font-size:.6rem;font-weight:700;line-height:1.3}
+.qual-card.sel{border-color:currentColor;transform:scale(1.06);box-shadow:0 3px 10px rgba(0,0,0,0.12)}
+
+/* MOOD CARDS */
+.mood-row{display:flex;gap:5px;margin-bottom:6px}
+.mood-card{flex:1;background:white;border:1.5px solid #e2e8f0;border-radius:12px;
+  padding:8px 3px;text-align:center;cursor:pointer;transition:all .18s}
+.mood-card .me{font-size:1.3rem;margin-bottom:3px}
+.mood-card .ml{font-size:.6rem;font-weight:700;color:var(--gray);line-height:1.3}
+.mood-card.sel{border-color:var(--teal);background:var(--lteal);transform:scale(1.06)}
+
+/* RÉVEIL COUNTER */
+.rev-counter{display:flex;align-items:center;justify-content:center;gap:12px;padding:8px 0}
+.rev-btn{width:36px;height:36px;border-radius:50%;border:none;font-size:1.2rem;
+  cursor:pointer;background:#e0e7ff;color:var(--indigo);font-weight:800;
+  display:flex;align-items:center;justify-content:center}
+.rev-num{font-family:var(--font-d);font-size:1.8rem;font-weight:800;color:var(--indigo);min-width:30px;text-align:center}
+
+/* TEXTAREA */
+.note-area{width:100%;padding:9px 11px;border:1.5px solid #e2e8f0;border-radius:12px;
+  font-family:var(--font-b);font-size:.85rem;color:var(--dgray);background:var(--lgray);
+  resize:vertical;min-height:60px;outline:none}
+.note-area:focus{border-color:var(--indigo);background:white}
+
+/* SAVE BTN */
+.save-btn{width:100%;padding:14px;border-radius:14px;border:none;
+  font-family:var(--font-d);font-size:.95rem;font-weight:800;cursor:pointer;
+  background:linear-gradient(135deg,var(--navy),#3730a3);color:white;
+  box-shadow:0 5px 18px rgba(26,26,62,0.26);margin-bottom:10px;
+  display:none;transition:all .18s}
+.save-btn.vis{display:block}
+.save-btn:active{transform:scale(0.97)}
+.saved-ok{text-align:center;font-size:.83rem;color:#16a34a;font-weight:700;
+  padding:5px;display:none}
+.saved-ok.show{display:block}
+
+/* RAPPEL BANNER */
+.rappel-banner{background:linear-gradient(135deg,#312e81,#1a1a3e);border-radius:var(--radius);
+  padding:14px;margin-bottom:10px;color:white}
+.rappel-banner h3{font-family:var(--font-d);font-size:.95rem;font-weight:800;margin-bottom:4px}
+.rappel-banner p{font-size:.78rem;opacity:.85;line-height:1.5}
+.rappel-time{font-family:var(--font-d);font-size:1.6rem;font-weight:800;
+  margin:6px 0;display:block}
+.rappel-badge{display:inline-block;padding:3px 10px;background:rgba(255,255,255,.15);
+  border-radius:20px;font-size:.72rem;font-weight:700;margin-top:4px}
+
+/* HISTORY */
+.hist-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.hist-top h2{font-family:var(--font-d);font-size:1rem;font-weight:800;color:var(--navy)}
+.hist-clear{font-size:.72rem;color:#94a3b8;background:none;border:none;
+  font-family:var(--font-b);cursor:pointer}
+.chart-box{background:white;border-radius:var(--radius);padding:13px;
+  margin-bottom:10px;box-shadow:var(--shadow);display:none}
+.chart-lbl{font-size:.68rem;font-weight:700;color:#94a3b8;text-transform:uppercase;
+  letter-spacing:.05em;margin-bottom:9px}
+.chart-bars{display:flex;align-items:flex-end;gap:4px;height:64px;padding-bottom:16px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;
+  gap:2px;height:100%;justify-content:flex-end}
+.bar{width:100%;border-radius:4px 4px 0 0;min-height:2px}
+.bar-n{font-size:8px;font-weight:700;color:var(--gray)}
+.bar-d{font-size:7px;color:#94a3b8}
+.hist-list{display:flex;flex-direction:column;gap:7px}
+.hist-entry{background:white;border-radius:14px;padding:12px 13px;
+  display:flex;align-items:flex-start;gap:9px;box-shadow:0 2px 7px rgba(0,0,0,0.06)}
+.hist-dot{width:42px;height:42px;border-radius:50%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;flex-shrink:0}
+.hist-dot-face{font-size:.95rem}
+.hist-dot-num{font-family:var(--font-d);font-size:1.05rem;font-weight:800;line-height:1}
+.hist-info{flex:1;min-width:0}
+.hist-name{font-weight:700;font-size:.85rem;color:var(--dgray)}
+.hist-date{font-size:.7rem;color:#94a3b8;margin-top:2px}
+.hist-detail{font-size:.7rem;color:var(--gray);margin-top:2px}
+.empty-box{text-align:center;padding:32px 18px;color:#94a3b8;font-size:.85rem}
+.empty-box .big{font-size:2rem;margin-bottom:7px}
+
+/* INSTALL */
+.install-card{background:white;border-radius:var(--radius);padding:15px;
+  box-shadow:var(--shadow);margin-bottom:10px}
+.install-card h3{font-family:var(--font-d);font-size:.92rem;font-weight:800;
+  color:var(--navy);margin-bottom:9px}
+.install-steps{list-style:none;display:flex;flex-direction:column;gap:9px}
+.install-steps li{display:flex;gap:9px;align-items:flex-start;
+  font-size:.8rem;color:#334155;line-height:1.5}
+.istep{width:23px;height:23px;border-radius:50%;background:var(--navy);color:white;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.72rem;font-weight:800;flex-shrink:0;margin-top:1px}
+.tip-box{border-radius:12px;padding:11px;margin-top:9px;font-size:.78rem;font-weight:600;line-height:1.5}
+.tip-green{background:#f0fdf4;border:1.5px solid #86efac;color:#166534}
+.tip-purple{background:#eef2ff;border:1.5px solid #a5b4fc;color:#3730a3}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;
+  display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:white;border-radius:22px 22px 0 0;
+  padding:20px 17px calc(20px + var(--safe-bot));
+  width:100%;max-width:500px;animation:slideUp .26s cubic-bezier(.34,1.56,.64,1)}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}
+.modal h3{font-family:var(--font-d);font-size:1rem;font-weight:800;
+  color:var(--navy);margin-bottom:11px}
+.modal input{width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;
+  border-radius:11px;font-family:var(--font-b);font-size:.92rem;
+  color:var(--dgray);outline:none;margin-bottom:11px}
+.modal input:focus{border-color:var(--indigo)}
+.modal-btns{display:flex;gap:7px}
+.modal-btns button{flex:1;padding:12px;border-radius:12px;border:none;
+  font-family:var(--font-d);font-size:.9rem;font-weight:800;cursor:pointer}
+.m-cancel{background:#f1f5f9;color:var(--gray)}
+.m-ok{background:var(--navy);color:white}
+
+/* Divider */
+.divider{height:1px;background:#f1f5f9;margin:8px 0}
+.sec-label{font-size:.7rem;font-weight:700;color:var(--gray);
+  text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <h1>🌙 Mon Agenda du Sommeil</h1>
+  <p>Co-construit avec mon équipe SAMSAH</p>
+  <div class="name-badge" onclick="openModal()" id="name-badge">👤 Ajouter mon prénom</div>
+</header>
+
+<nav class="nav">
+  <button class="active" onclick="sw('soir')"><span class="ni">🌙</span>Soir</button>
+  <button onclick="sw('matin')"><span class="ni">☀️</span>Matin</button>
+  <button onclick="sw('hist')"><span class="ni">📅</span>Historique</button>
+  <button onclick="sw('rappel')"><span class="ni">💊</span>Rappel</button>
+  <button onclick="sw('info')"><span class="ni">📱</span>Installer</button>
+</nav>
+
+<!-- ══ SOIR ══ -->
+<div id="screen-soir" class="screen active">
+
+  <!-- Rappel mélatonine -->
+  <div class="rappel-banner">
+    <h3>💊 Rappel Mélatonine</h3>
+    <span class="rappel-time">21h30</span>
+    <p>N'oublie pas de prendre ta mélatonine ce soir.</p>
+    <span class="rappel-badge">⏰ Rappel configuré chaque soir</span>
+  </div>
+
+  <div class="card">
+    <div class="pill" style="background:#eef2ff">
+      <span class="pill-icon">🕐</span>
+      <span class="pill-label" style="color:#3730a3">Horaires du soir</span>
+    </div>
+    <div class="time-blocks">
+      <div class="time-block">
+        <div class="tb-icon">🛏️</div>
+        <div class="tb-label">Je me couche à</div>
+        <input class="tb-input" type="time" id="s-coucher" />
+      </div>
+      <div class="time-block">
+        <div class="tb-icon">💤</div>
+        <div class="tb-label">Endormissement</div>
+        <input class="tb-input" type="number" id="s-endorm" placeholder="30" min="0" max="180" />
+        <div class="tb-hint">minutes</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="pill" style="background:#eef2ff">
+      <span class="pill-icon">✨</span>
+      <span class="pill-label" style="color:#3730a3">Rituels du soir réalisés</span>
+    </div>
+    <div class="check-grid" id="rituels-grid"></div>
+    <div class="add-row">
+      <input id="rit-input" type="text" placeholder="Ajouter un rituel..." />
+      <button onclick="addRituel()">+ Ajouter</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="pill" style="background:#fffbeb">
+      <span class="pill-icon">⚡</span>
+      <span class="pill-label" style="color:#92400e">Facteurs perturbateurs ce soir</span>
+    </div>
+    <div class="check-grid" id="factors-grid"></div>
+    <div class="add-row">
+      <input id="fac-input" type="text" placeholder="Ajouter un facteur..." />
+      <button onclick="addFactor()">+ Ajouter</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label">📝 Note du soir (facultatif)</div>
+    <textarea class="note-area" id="s-note" placeholder="Ce que tu veux ajouter..."></textarea>
+  </div>
+
+  <button class="save-btn vis" onclick="saveSoir()">🌙 Enregistrer ma soirée</button>
+  <div class="saved-ok" id="saved-soir">Soirée enregistrée ! 🎉</div>
+</div>
+
+<!-- ══ MATIN ══ -->
+<div id="screen-matin" class="screen">
+
+  <div class="card">
+    <div class="pill" style="background:#f0fdfa">
+      <span class="pill-icon">🔔</span>
+      <span class="pill-label" style="color:#0f766e">Au réveil</span>
+    </div>
+    <div class="time-blocks">
+      <div class="time-block">
+        <div class="tb-icon">☀️</div>
+        <div class="tb-label">Je me lève à</div>
+        <input class="tb-input" type="time" id="m-lever" />
+      </div>
+      <div class="time-block">
+        <div class="tb-icon">⏱️</div>
+        <div class="tb-label">Durée du sommeil</div>
+        <input class="tb-input" type="number" id="m-duree" placeholder="7" min="0" max="14" step="0.5"/>
+        <div class="tb-hint">heures</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="sec-label">🔔 Réveils dans la nuit</div>
+    <div class="rev-counter">
+      <button class="rev-btn" onclick="changeRev(-1)">−</button>
+      <div class="rev-num" id="rev-num">0</div>
+      <button class="rev-btn" onclick="changeRev(1)">+</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="pill" style="background:#f0fdfa">
+      <span class="pill-icon">⭐</span>
+      <span class="pill-label" style="color:#0f766e">Qualité du sommeil cette nuit</span>
+    </div>
+    <div class="qual-row" id="qual-row"></div>
+  </div>
+
+  <div class="card">
+    <div class="pill" style="background:#f0fdfa">
+      <span class="pill-icon">😊</span>
+      <span class="pill-label" style="color:#0f766e">Comment je me sens en me levant ?</span>
+    </div>
+    <div class="mood-row" id="mood-row"></div>
+  </div>
+
+  <div class="card">
+    <div class="pill" style="background:#f0fdfa">
+      <span class="pill-icon">💡</span>
+      <span class="pill-label" style="color:#0f766e">Ce qui a aidé cette nuit</span>
+    </div>
+    <div class="check-grid" id="helps-grid"></div>
+    <div class="add-row">
+      <input id="help-input" type="text" placeholder="Ajouter..." />
+      <button onclick="addHelp()">+ Ajouter</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label">📝 Note du matin (facultatif)</div>
+    <textarea class="note-area" id="m-note" placeholder="Ce que tu veux ajouter..."></textarea>
+  </div>
+
+  <button class="save-btn vis" onclick="saveMatin()">☀️ Enregistrer mon réveil</button>
+  <div class="saved-ok" id="saved-matin">Matin enregistré ! 🎉</div>
+</div>
+
+<!-- ══ HISTORIQUE ══ -->
+<div id="screen-hist" class="screen">
+  <div class="hist-top">
+    <h2>Mes nuits</h2>
+    <button class="hist-clear" onclick="clearHist()">Tout effacer</button>
+  </div>
+  <div class="chart-box" id="chart-box">
+    <div class="chart-lbl">Qualité — 7 dernières nuits</div>
+    <div class="chart-bars" id="chart-bars"></div>
+  </div>
+  <div class="hist-list" id="hist-list"></div>
+</div>
+
+<!-- ══ RAPPEL ══ -->
+<div id="screen-rappel" class="screen">
+  <div class="rappel-banner" style="margin-bottom:12px">
+    <h3>💊 Rappel Mélatonine — 21h30</h3>
+    <span class="rappel-time">21:30</span>
+    <p>Ce rappel sonne chaque soir à 21h30 pour te rappeler de prendre ta mélatonine avant de dormir.</p>
+  </div>
+
+  <div class="install-card">
+    <h3>⏰ Configurer le rappel sur iPhone</h3>
+    <p style="font-size:.78rem;color:#475569;margin-bottom:10px;line-height:1.5">
+      Pour recevoir une alarme chaque soir à 21h30, deux options :
+    </p>
+    <div class="tip-box tip-purple" style="margin-bottom:10px">
+      <strong>Option 1 — Fichier agenda (.ics)</strong><br>
+      Ouvre le fichier <strong>rappel-melatonine-21h30.ics</strong> sur ton iPhone.
+      Il s'importe automatiquement dans ton calendrier avec un rappel chaque soir.
+    </div>
+    <div class="tip-box tip-green">
+      <strong>Option 2 — Alarme manuelle</strong><br>
+      Ouvre l'app <strong>Horloge</strong> → onglet <strong>Alarme</strong> →
+      appuie sur <strong>+</strong> → règle sur <strong>21:30</strong> →
+      active <strong>Répéter tous les jours</strong> → nomme-la <strong>"💊 Mélatonine"</strong>.
+    </div>
+  </div>
+
+  <div class="install-card">
+    <h3>🔧 Modifier l'heure du rappel</h3>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+      <input type="time" id="rappel-time-input" value="21:30"
+        style="flex:1;padding:9px 11px;border:1.5px solid #e2e8f0;border-radius:11px;
+        font-family:var(--font-b);font-size:.95rem;color:var(--dgray);outline:none">
+      <button onclick="saveRappelTime()"
+        style="padding:9px 14px;border-radius:11px;border:none;background:var(--navy);
+        color:white;font-family:var(--font-d);font-size:.85rem;font-weight:800;cursor:pointer">
+        Enregistrer
+      </button>
+    </div>
+    <div id="rappel-saved" style="font-size:.75rem;color:#16a34a;font-weight:700;
+      margin-top:6px;display:none">✅ Heure mise à jour !</div>
+  </div>
+</div>
+
+<!-- ══ INSTALLER ══ -->
+<div id="screen-info" class="screen">
+  <div class="install-card">
+    <h3>📱 Ajouter à l'écran d'accueil iPhone</h3>
+    <ol class="install-steps">
+      <li><span class="istep">1</span><span>Ouvre cette page dans <strong>Safari</strong> (pas Chrome)</span></li>
+      <li><span class="istep">2</span><span>Appuie sur l'icône <strong>Partager ↑</strong> en bas de Safari</span></li>
+      <li><span class="istep">3</span><span>Appuie sur <strong>« Sur l'écran d'accueil »</strong></span></li>
+      <li><span class="istep">4</span><span>Appuie sur <strong>« Ajouter »</strong> — l'icône apparaît !</span></li>
+    </ol>
+    <div class="tip-box tip-green" style="margin-top:10px">
+      ✅ Une fois installé, l'outil fonctionne sans connexion internet.
+      Toutes tes données restent sur ton iPhone.
+    </div>
+  </div>
+  <div class="install-card">
+    <h3>🔒 Confidentialité</h3>
+    <p style="font-size:.8rem;color:#475569;line-height:1.6">
+      Toutes les données (nuits, personnalisations, prénom) restent
+      <strong>uniquement sur cet appareil</strong>. Rien n'est envoyé sur internet.
+    </p>
+  </div>
+</div>
+
+<!-- MODAL NOM -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOut(event)">
+  <div class="modal">
+    <h3>👤 Mon prénom</h3>
+    <input type="text" id="modal-input" placeholder="Écris ton prénom..." maxlength="30" />
+    <div class="modal-btns">
+      <button class="m-cancel" onclick="closeModal()">Annuler</button>
+      <button class="m-ok" onclick="saveName()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const DEFAULT_RITUELS = [
+  {icon:'🚿',label:'Douche / bain'},{icon:'🦷',label:'Brossage dents'},
+  {icon:'📖',label:'Lecture'},{icon:'📵',label:'Écrans éteints'},
+  {icon:'🧘',label:'Relaxation'},{icon:'🎵',label:'Musique douce'},
+  {icon:'🌑',label:'Obscurité'},{icon:'🔕',label:'Sons coupés'},
+  {icon:'🍵',label:'Tisane'},{icon:'📝',label:'Journal'},
+  {icon:'🌡️',label:'Chambre fraîche'},{icon:'💊',label:'Mélatonine prise ✓'},
+];
+const DEFAULT_FACTORS = [
+  {icon:'😰',label:'Stress'},{icon:'🔊',label:'Bruit'},
+  {icon:'💡',label:'Lumière'},{icon:'🌡️',label:'Température'},
+  {icon:'📱',label:'Écrans tard'},{icon:'☕',label:'Caféine'},
+  {icon:'🍽️',label:'Repas lourd'},{icon:'🏃',label:'Sport tardif'},
+  {icon:'🤒',label:'Douleur'},{icon:'💬',label:'Ruminations'},
+  {icon:'🔄',label:'Chgt routine'},{icon:'😰',label:'Anxiété'},
+];
+const DEFAULT_HELPS = [
+  {icon:'🎵',label:'Bruit blanc'},{icon:'💊',label:'Mélatonine'},
+  {icon:'❄️',label:'Compresse froide'},{icon:'📖',label:'Lecture calme'},
+  {icon:'🫁',label:'Respiration lente'},{icon:'🌡️',label:'Chambre fraîche'},
+];
+
+const QUAL_DATA = [
+  {e:'😴',l:'Très\nmauvaise',bg:'#fee2e2',stroke:'#dc2626',val:1},
+  {e:'😕',l:'Mauvaise',bg:'#fef3c7',stroke:'#d97706',val:2},
+  {e:'😐',l:'Moyenne',bg:'#fefce8',stroke:'#ca8a04',val:3},
+  {e:'🙂',l:'Bonne',bg:'#dcfce7',stroke:'#16a34a',val:4},
+  {e:'😊',l:'Excellente',bg:'#d1fae5',stroke:'#059669',val:5},
+];
+const MOOD_DATA = [
+  {e:'😞',l:'Très\nfatigué(e)'},{e:'😔',l:'Fatigué(e)'},
+  {e:'😐',l:'Correct(e)'},{e:'🙂',l:'Reposé(e)'},{e:'😄',l:'Très\nreposé(e)'},
+];
+
+let S = JSON.parse(localStorage.getItem('sommeil_state')||'null') || {
+  name:'',
+  rituels: JSON.parse(JSON.stringify(DEFAULT_RITUELS)),
+  factors: JSON.parse(JSON.stringify(DEFAULT_FACTORS)),
+  helps: JSON.parse(JSON.stringify(DEFAULT_HELPS)),
+  rappelTime: '21:30',
+  history: []
+};
+function save(){ localStorage.setItem('sommeil_state', JSON.stringify(S)); }
+
+// ── EVAL STATE ────────────────────────────────────────────────────────────────
+let ev = freshEv();
+function freshEv(){
+  return {
+    coucher:'', endorm:'', lever:'', duree:'', reveils:0,
+    qualite:null, humeur:null,
+    rituels:new Set(), factors:new Set(), helps:new Set(),
+    noteS:'', noteM:''
+  };
+}
+
+// ── CHIPS ─────────────────────────────────────────────────────────────────────
+function buildChips(containerId, items, evSet, activeClass, inputId){
+  const g = document.getElementById(containerId);
+  g.innerHTML = '';
+  items.forEach(item => {
+    const d = document.createElement('div');
+    d.className = 'check-chip' + (evSet.has(item.label)?' '+activeClass:'');
+    d.innerHTML = `<span class="ci">${item.icon}</span>${item.label}`;
+    d.onclick = ()=>{ evSet.has(item.label)?evSet.delete(item.label):evSet.add(item.label); d.classList.toggle(activeClass); };
+    g.appendChild(d);
+  });
+}
+
+function addChip(inputId, arr, evSet, gridId, activeClass){
+  const v = document.getElementById(inputId).value.trim();
+  if(!v) return;
+  const item = {icon:'⭕', label:v};
+  if(!arr.find(x=>x.label===v)) arr.push(item);
+  evSet.add(v);
+  document.getElementById(inputId).value='';
+  save(); buildChips(gridId, arr, evSet, activeClass);
+}
+
+function addRituel(){ addChip('rit-input', S.rituels, ev.rituels, 'rituels-grid','active-indigo'); }
+function addFactor(){ addChip('fac-input', S.factors, ev.factors, 'factors-grid','active-amber'); }
+function addHelp(){   addChip('help-input', S.helps,  ev.helps,  'helps-grid',  'active-teal'); }
+
+// ── QUALITÉ ───────────────────────────────────────────────────────────────────
+function buildQual(){
+  const row = document.getElementById('qual-row');
+  row.innerHTML = '';
+  QUAL_DATA.forEach((q,i)=>{
+    const d = document.createElement('div');
+    d.className = 'qual-card'+(ev.qualite===i?' sel':'');
+    d.style.background = q.bg;
+    d.style.color = q.stroke;
+    d.innerHTML = `<div class="qe">${q.e}</div><div class="ql">${q.l.replace('\n','<br>')}</div>`;
+    d.onclick=()=>{ ev.qualite=i; buildQual(); };
+    row.appendChild(d);
+  });
+}
+
+// ── HUMEUR ────────────────────────────────────────────────────────────────────
+function buildMood(){
+  const row = document.getElementById('mood-row');
+  row.innerHTML='';
+  MOOD_DATA.forEach((m,i)=>{
+    const d = document.createElement('div');
+    d.className = 'mood-card'+(ev.humeur===i?' sel':'');
+    d.innerHTML = `<div class="me">${m.e}</div><div class="ml">${m.l.replace('\n','<br>')}</div>`;
+    d.onclick=()=>{ ev.humeur=i; buildMood(); };
+    row.appendChild(d);
+  });
+}
+
+// ── RÉVEILS ───────────────────────────────────────────────────────────────────
+function changeRev(d){
+  ev.reveils = Math.max(0, Math.min(10, ev.reveils+d));
+  document.getElementById('rev-num').textContent = ev.reveils;
+}
+
+// ── SAVE SOIR ─────────────────────────────────────────────────────────────────
+function saveSoir(){
+  ev.coucher = document.getElementById('s-coucher').value;
+  ev.endorm  = document.getElementById('s-endorm').value;
+  ev.noteS   = document.getElementById('s-note').value;
+  // Attach to today's entry or create new
+  const key = todayKey();
+  let entry = S.history.find(e=>e.key===key);
+  if(!entry){ entry={key, date:new Date().toISOString()}; S.history.unshift(entry); }
+  entry.coucher = ev.coucher;
+  entry.endorm  = ev.endorm;
+  entry.rituels = [...ev.rituels];
+  entry.factors = [...ev.factors];
+  entry.noteS   = ev.noteS;
+  if(S.history.length>60) S.history.pop();
+  save();
+  flash('saved-soir');
+}
+
+// ── SAVE MATIN ────────────────────────────────────────────────────────────────
+function saveMatin(){
+  ev.lever  = document.getElementById('m-lever').value;
+  ev.duree  = document.getElementById('m-duree').value;
+  ev.noteM  = document.getElementById('m-note').value;
+  const key = todayKey();
+  let entry = S.history.find(e=>e.key===key);
+  if(!entry){ entry={key, date:new Date().toISOString()}; S.history.unshift(entry); }
+  entry.lever   = ev.lever;
+  entry.duree   = ev.duree;
+  entry.reveils = ev.reveils;
+  entry.qualite = ev.qualite!=null ? QUAL_DATA[ev.qualite] : null;
+  entry.humeur  = ev.humeur!=null  ? MOOD_DATA[ev.humeur]  : null;
+  entry.helps   = [...ev.helps];
+  entry.noteM   = ev.noteM;
+  if(S.history.length>60) S.history.pop();
+  save();
+  flash('saved-matin');
+}
+
+function flash(id){
+  const el=document.getElementById(id);
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+function todayKey(){
+  return new Date().toISOString().slice(0,10);
+}
+
+// ── HISTORY ───────────────────────────────────────────────────────────────────
+function renderHist(){
+  const list=document.getElementById('hist-list');
+  const chartBox=document.getElementById('chart-box');
+  if(!S.history.length){
+    chartBox.style.display='none';
+    list.innerHTML=`<div class="empty-box"><div class="big">📭</div>Aucune nuit enregistrée.<br>Commence par l'onglet Soir !</div>`;
+    return;
+  }
+  chartBox.style.display='block';
+  const recent=S.history.slice(0,7).reverse();
+  document.getElementById('chart-bars').innerHTML=recent.map(e=>{
+    const h = e.qualite ? Math.round((e.qualite.val/5)*48) : 4;
+    const col = e.qualite ? e.qualite.bg : '#e2e8f0';
+    const d=new Date(e.date);
+    const label=d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'});
+    return `<div class="bar-col">
+      <span class="bar-n">${e.qualite?e.qualite.val:'-'}</span>
+      <div class="bar" style="height:${h}px;background:${col};border:1px solid ${e.qualite?e.qualite.stroke:'#e2e8f0'}"></div>
+      <span class="bar-d">${label}</span>
+    </div>`;
+  }).join('');
+
+  list.innerHTML=S.history.map(e=>{
+    const d=new Date(e.date||e.key);
+    const ds=d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+    const face = e.qualite?e.qualite.e:'🌙';
+    const qval = e.qualite?e.qualite.val:'-';
+    const qbg  = e.qualite?e.qualite.bg:'#f1f5f9';
+    const qtc  = e.qualite?e.qualite.stroke:'#64748b';
+    let details=[];
+    if(e.coucher) details.push(`🛏️ ${e.coucher}`);
+    if(e.lever)   details.push(`☀️ ${e.lever}`);
+    if(e.duree)   details.push(`⏱️ ${e.duree}h`);
+    if(typeof e.reveils==='number') details.push(`🔔 ${e.reveils} réveil${e.reveils>1?'s':''}`);
+    if(e.humeur)  details.push(e.humeur.e);
+    return `<div class="hist-entry">
+      <div class="hist-dot" style="background:${qbg}">
+        <div class="hist-dot-face">${face}</div>
+        <div class="hist-dot-num" style="color:${qtc}">${qval}</div>
+      </div>
+      <div class="hist-info">
+        <div class="hist-name">${ds}</div>
+        <div class="hist-detail">${details.join(' · ')}</div>
+        ${e.rituels&&e.rituels.length?`<div class="hist-detail">✨ ${e.rituels.slice(0,3).join(', ')}${e.rituels.length>3?'…':''}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function clearHist(){
+  if(!confirm('Effacer tout l\'historique ?')) return;
+  S.history=[]; save(); renderHist();
+}
+
+// ── RAPPEL ────────────────────────────────────────────────────────────────────
+function saveRappelTime(){
+  const v=document.getElementById('rappel-time-input').value;
+  if(!v) return;
+  S.rappelTime=v; save();
+  const el=document.getElementById('rappel-saved');
+  el.style.display='block';
+  setTimeout(()=>el.style.display='none',2000);
+}
+
+// ── NAME ──────────────────────────────────────────────────────────────────────
+function openModal(){
+  document.getElementById('modal-input').value=S.name;
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('modal-input').focus(),300);
+}
+function closeModal(){ document.getElementById('modal-overlay').classList.remove('open'); }
+function closeModalOut(e){ if(e.target===document.getElementById('modal-overlay')) closeModal(); }
+function saveName(){
+  S.name=document.getElementById('modal-input').value.trim();
+  save(); updateBadge(); closeModal();
+}
+function updateBadge(){
+  document.getElementById('name-badge').textContent=S.name?`👤 ${S.name}`:'👤 Ajouter mon prénom';
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+const TABS=['soir','matin','hist','rappel','info'];
+function sw(t){
+  document.querySelectorAll('.nav button').forEach((b,i)=>b.classList.toggle('active',TABS[i]===t));
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+t).classList.add('active');
+  if(t==='hist') renderHist();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+updateBadge();
+buildChips('rituels-grid', S.rituels, ev.rituels, 'active-indigo');
+buildChips('factors-grid', S.factors, ev.factors, 'active-amber');
+buildChips('helps-grid',   S.helps,   ev.helps,   'active-teal');
+buildQual();
+buildMood();
+document.getElementById('rappel-time-input').value = S.rappelTime||'21:30';
+</script>
+</body>
+</html>
